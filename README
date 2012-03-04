@@ -1,0 +1,9 @@
+STFU
+=======
+
+STFU is an Android-Application that connects
+to a computer remote via SSH to control the 
+Volume via PulseAudio.
+
+More Information at:
+http://hihn.org/stfu-android-application/
