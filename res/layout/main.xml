@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    >
+
+<TextView
+	android:id="@+id/about_content"
+	android:layout_width="fill_parent"
+	android:layout_height="wrap_content"
+	android:textSize="18dp"
+	android:text="@string/computer_address" 
+	/>
+
+<TextView
+	android:id="@+id/error_tv"
+	android:layout_width="fill_parent"
+	android:layout_height="wrap_content"
+	android:textSize="18dp"
+	android:textStyle="bold"
+	android:textColor="#FF0000"
+	android:visibility="invisible"
+	android:layout_marginTop="5dp"
+	android:layout_marginBottom="5dp"
+	/>
+
+
+<EditText
+	android:id="@+id/user_txt"
+	android:layout_width="fill_parent"
+	android:layout_height="wrap_content"
+	android:lines="1"
+	/>
+
+<EditText
+	android:id="@+id/host_txt"
+	android:layout_width="fill_parent"
+	android:layout_height="wrap_content"
+	android:lines="1"
+	/>
+
+
+<TableLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    android:shrinkColumns="1">
+    
+    <TableRow>
+		<ImageButton
+			android:id="@+id/connect_btn"
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:src="@drawable/connect_established"
+		/>
+		<ImageButton
+			android:id="@+id/disconnect_btn"
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:src="@drawable/connect_no"
+			/>
+    </TableRow>
+    
+    <TableRow>
+		<ImageButton
+			android:id="@+id/decrease_btn"
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:src="@drawable/audio_volume_low"
+			android:visibility="invisible"
+			/>        
+		<ImageButton
+			android:id="@+id/increase_btn"
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:src="@drawable/audio_volume_medium"
+			android:visibility="invisible"
+			/>		
+    </TableRow>        
+    
+    <TableRow>
+		<ImageButton
+			android:id="@+id/mute_btn"
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:src="@drawable/audio_volume_off"
+			android:visibility="invisible"
+			/>        
+		<ImageButton
+			android:id="@+id/unmute_btn"
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:src="@drawable/audio_volume_high"
+			android:visibility="invisible"
+			/>			
+    </TableRow>   
+        
+</TableLayout>
+
+</LinearLayout>
