@@ -9,5 +9,17 @@
 	<EditTextPreference 
 		android:title="@string/hostname"
 		android:key="hostname" 
-		android:summary="@string/hostname_summary" />	
+		android:summary="@string/hostname_summary" />
+    
+    <EditTextPreference 
+        android:title="@string/port"
+        android:key="port"
+        android:numeric="integer" 
+        android:summary="@string/port_summary" />	
+		
+    <EditTextPreference 
+        android:title="@string/sink_device"
+        android:key="sink_device"
+        android:numeric="integer" 
+        android:summary="@string/sink_device_summary" />
 </PreferenceScreen>

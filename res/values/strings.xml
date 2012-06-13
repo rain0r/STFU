@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">STFU</string>
-    <string name="hostname">Default Hostname</string>
+    <string name="hostname">Hostname</string>
     <string name="hostname_summary">The default hostname to connect to.</string>
     <string name="settings_label">Settings</string>
 	<string name="settings_title">STFU settings</string>
@@ -19,4 +19,8 @@
 	<string name="username_summary">The username to log in with</string>	
 	<string name="could_not_find_id_rsa">Could not find the id_rsa keys! Did you place them to /sdcard/STFU/? \nSTFU will not work without these keys since it uses the Public Key Authentication</string>
 	<string name="auth_failed">Auth failed! \nDid you add the Public Key to the authorized_keys on the host? \nIs the username correct?</string>	    
+    <string name="port">Port</string>
+    <string name="port_summary">Enter the Port of the SSH-Server (default 22)</string>
+    <string name="sink_device">Sink Device</string>
+    <string name="sink_device_summary">The Number of the Sink Device (default 0)</string>    
 </resources>

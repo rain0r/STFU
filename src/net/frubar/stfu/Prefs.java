@@ -26,38 +26,54 @@ import android.util.Log;
 
 public class Prefs extends PreferenceActivity {
 	private static final String TAG = "Prefs";
+
+	// Option names and default values
+	private static final String OPT_HOSTNAME = "hostname";
+	private static final String OPT_HOSTNAME_DEF = "";
+
+	private static final String OPT_USERNAME = "username";
+	private static final String OPT_USERNAME_DEF = "";
+
+	private static final String OPT_SINK = "sink";
+	private static final String OPT_SINK_DEF = "0";
 	
-   // Option names and default values	
-   private static final String OPT_HOSTNAME = "hostname";
-   private static final String OPT_HOSTNAME_DEF = "";
-   
-   private static final String OPT_USERNAME = "username";
-   private static final String OPT_USERNAME_DEF = "";
-  
-   
-   @Override
-   protected void onCreate(Bundle savedInstanceState) {
-      super.onCreate(savedInstanceState);
-      // Log.d(TAG, "onCreate()-Prefs");     
-      addPreferencesFromResource(R.xml.settings);
-   }
+	private static final String OPT_PORT = "port";
+	private static final String OPT_PORT_DEF = "22";	
 
-   // Hostname  
-   public static String getHostname(Context context) {
-	   return PreferenceManager.getDefaultSharedPreferences(context)
-	   	.getString(OPT_HOSTNAME, OPT_HOSTNAME_DEF);
-   }
-   
-   // Username
-   public static String getUsername(Context context) {
-	   return PreferenceManager.getDefaultSharedPreferences(context)
-	   	.getString(OPT_USERNAME, OPT_USERNAME_DEF);
-   }
+	@Override
+	protected void onCreate(Bundle savedInstanceState) {
+		super.onCreate(savedInstanceState);
+		// Log.d(TAG, "onCreate()-Prefs");
+		addPreferencesFromResource(R.xml.settings);
+	}
 
-   
-   @Override
-   public void onConfigurationChanged(Configuration newConfig) {
-	   super.onConfigurationChanged(newConfig);
-	   // Log.d(TAG, "onConfigurationChanged()");   
-   }   
+	// Hostname
+	public static String getHostname(Context context) {
+		return PreferenceManager.getDefaultSharedPreferences(context)
+				.getString(OPT_HOSTNAME, OPT_HOSTNAME_DEF);
+	}
+
+	// Username
+	public static String getUsername(Context context) {
+		return PreferenceManager.getDefaultSharedPreferences(context)
+				.getString(OPT_USERNAME, OPT_USERNAME_DEF);
+	}
+
+	// Sink
+	public static String getSink(Context context) {
+		return PreferenceManager.getDefaultSharedPreferences(context)
+				.getString(OPT_SINK, OPT_SINK_DEF);
+	}
+	
+	// Port
+	public static String getPort(Context context) {
+		return PreferenceManager.getDefaultSharedPreferences(context)
+				.getString(OPT_PORT, OPT_PORT_DEF);
+	}	
+
+	@Override
+	public void onConfigurationChanged(Configuration newConfig) {
+		super.onConfigurationChanged(newConfig);
+		// Log.d(TAG, "onConfigurationChanged()");
+	}
 }
