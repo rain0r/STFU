@@ -1,0 +1,15 @@
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android" >
+
+    <net.frubar.stfu.RemoteComputerPreference
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:padding="5dip"
+        android:title="Add a new Remote Computer" />
+
+    <EditTextPreference
+        android:key="sink_device"
+        android:numeric="integer"
+        android:summary="The Number of the Sink Device (default 0)"
+        android:title="Sink Device" />
+
+</PreferenceScreen>

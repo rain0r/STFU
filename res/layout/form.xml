@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content" >
+
+    <EditText
+        android:id="@+id/user_txt"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        android:hint="Username"
+        android:lines="1" />
+
+    <EditText
+        android:id="@+id/host_txt"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_alignParentLeft="true"
+        android:layout_below="@id/user_txt"
+        android:layout_toLeftOf="@+id/port_txt"
+        android:hint="Hostname or IP"
+        android:lines="1" />
+
+    <EditText
+        android:id="@+id/port_txt"
+        android:layout_width="96dp"
+        android:layout_height="wrap_content"
+        android:layout_alignParentRight="true"
+        android:layout_below="@id/user_txt"
+        android:hint="Port"
+        android:inputType="numberSigned"
+        android:lines="1" />
+
+    <TextView
+        android:id="@+id/additional_values"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/host_txt"
+        android:gravity="center_horizontal"
+        android:text="Advanced Settings\n(Don&apos;t change if you don&apos;t know what it&apos;s about)" />
+
+    <TextView
+        android:id="@+id/sink_device_help"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentLeft="true"
+        android:layout_below="@id/additional_values"
+        android:gravity="center_vertical"
+        android:text="Sink Device" />
+
+    <EditText
+        android:id="@+id/sink_device_txt"
+        android:layout_width="96dp"
+        android:layout_height="wrap_content"
+        android:layout_alignParentRight="true"
+        android:layout_below="@id/additional_values"
+        android:lines="1"
+        android:numeric="integer"
+        android:text="0" />
+
+</RelativeLayout>
