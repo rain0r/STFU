@@ -20,23 +20,29 @@ package net.frubar.stfu;
 
 import java.io.InputStream;
 import java.security.Security;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
 
 import org.bouncycastle2.jce.provider.BouncyCastleProvider;
 
 import android.app.Activity;
-import android.app.ProgressDialog;
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.res.Configuration;
 import android.os.Bundle;
-import android.os.Handler;
-import android.os.Message;
+import android.os.Environment;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
-import android.widget.EditText;
+import android.view.Window;
+import android.widget.ArrayAdapter;
+import android.widget.Button;
+import android.widget.Spinner;
 import android.widget.TextView;
 
 import com.jcraft.jsch.Channel;
@@ -44,43 +50,35 @@ import com.jcraft.jsch.ChannelExec;
 import com.jcraft.jsch.JSch;
 import com.jcraft.jsch.Session;
 
-public class STFU extends Activity implements Runnable, OnClickListener {
+public class STFU extends Activity implements OnClickListener {
 	private static final String TAG = "STFU";
+	public static final String PREFS_FILE_NAME = "STFU";
 
-	// SSH
-	private String user;
-	private String host;
-	private String port;
-	private String sink;
-
-	private JSch jsch = new JSch();
-	private Session session;
-	private Channel channel;
-	private static java.util.Properties config;
+	private JSch jsch = null;
+	private Session session = null;
+	private Channel channel = null;
+	private static java.util.Properties config = null;
+	private boolean keys_found = false;
 
 	// commands
-	private String mute_cmd;
-	private String unmute_cmd;
-	private String increase_cmd;
-	private String decrease_cmd;
-	private String get_sink_cmd = "pacmd list-sinks | grep '* index'";
+	private String mute_cmd = null;
+	private String unmute_cmd = null;
+	private String increase_cmd = null;
+	private String decrease_cmd = null;
+	// private String get_sink_cmd = "pacmd list-sinks | grep '* index'";
 
 	// buttons
-	private View connect_btn;
-	private View disconnect_btn;
-	private View mute_btn;
-	private View unmute_btn;
-	private View increase_btn;
-	private View decrease_btn;
+	private View connect_btn = null;
+	private View disconnect_btn = null;
+	private View mute_btn = null;
+	private View unmute_btn = null;
+	private View increase_btn = null;
+	private View decrease_btn = null;
 
-	// ProgressDialog
-	private ProgressDialog pd;
-
-	// Views
-	private TextView error_tv;
-	private EditText host_txt;
-	private EditText user_txt;
-	private EditText port_txt;
+	public static RemoteComputerData connect_remote_computer_data = null;
+	// private SpinnerActivity spinner_activity = null;
+	private Spinner remote_computer_spinner = null;
+	private boolean mute_status = false;
 
 	static {
 		// BouncyCastle for correct SSH Login
@@ -94,135 +92,93 @@ public class STFU extends Activity implements Runnable, OnClickListener {
 	/** Called when the activity is first created. */
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
+		Log.d(TAG, "onCreate()");
 		super.onCreate(savedInstanceState);
-
-		// Log.d(TAG, "onCreate()");
+		
+		this.requestWindowFeature(Window.FEATURE_NO_TITLE);
 		setContentView(R.layout.main);
 
-		// Log.d(TAG, "Starting the ProgressDialog");
-		this.initProgressDialog();
+		this.jsch = new JSch();
+		this.find_views();
+		this.setListeners();
+		this.load_ssh_key();
 
-		try {
-			// Log.d(TAG, "Starting the Thread for loading the keys");
-			Thread thread = new Thread(this);
-			thread.start();
-		} catch (Exception e) {
-			// Log.e(TAG, "Exception", e);
-		}	
-		
-		/**
-		 * initialize with default port and sink
-		 */
-		try {
-			this.sink = Prefs.getSink(this);
-			this.port = Prefs.getPort(this);
-			this.mute_cmd = "pactl set-sink-mute "+Integer.parseInt(this.sink)+" 1";
-			this.unmute_cmd = "pactl set-sink-mute "+Integer.parseInt(this.sink)+" 0";
-			this.increase_cmd = "pactl set-sink-volume "+Integer.parseInt(this.sink)+" +5%";
-			this.decrease_cmd = "pactl -- set-sink-volume "+Integer.parseInt(this.sink)+" -5%";
+		if (this.keys_found) {
+			this.load_saved_remote_computer();
 		}
-		catch (Exception e) {
-			// Log.e(TAG, "Error: "+e);
-			this.error_tv.setText("Error:\n" + e.getMessage());
-		}
-
-		findViews();
-		setListeners();
-		setHints();
 	}
+	
+	@Override
+	protected void onResume() {
+		super.onResume();
+		Log.d(TAG, "onResume()");
+		this.load_saved_remote_computer();
+	}
+
 
 	/**
 	 * find Views and Edits
 	 */
-	private void findViews() {
-		// Log.d(TAG, "find Views");
-		this.error_tv = (TextView) findViewById(R.id.error_tv);
-		this.host_txt = (EditText) findViewById(R.id.host_txt);
-		this.user_txt = (EditText) findViewById(R.id.user_txt);
-		this.port_txt = (EditText) findViewById(R.id.port_txt);
-	}
-
-	/**
-	 * Set Hints
-	 */
-	private void setHints() {
-		try {
-			// Log.d(TAG, "set Hints");
-			this.host = Prefs.getHostname(this);
-			this.user = Prefs.getUsername(this);
-		} catch (Exception e) {
-			// Log.e(TAG, "Error getting Preferences: " + e);
-			this.error_tv.setText("Error:\n" + e.getMessage());
-		}
-		
-		try {
-			this.host_txt.setHint(this.host);
-			this.user_txt.setHint(this.user);
-			this.port_txt.setHint(this.port);
-		} catch (Exception e) {
-			// Log.e(TAG, "Error setting Hints: " + e.getMessage());
-			this.error_tv.setText("Error:\n" + e.getMessage());
-		}
+	private void find_views() {
+		Log.d(TAG, "findViews()");
+		this.connect_btn = (Button) findViewById(R.id.connect_btn);
+		this.disconnect_btn = (Button) findViewById(R.id.disconnect_btn);
+		this.mute_btn = (Button) findViewById(R.id.mute_btn);
+		this.unmute_btn = (Button) findViewById(R.id.unmute_btn);
+		this.increase_btn = (Button) findViewById(R.id.increase_btn);
+		this.decrease_btn = (Button) findViewById(R.id.decrease_btn);
 	}
 
 	/**
 	 * Set listeners for Buttons
 	 */
 	private void setListeners() {
-		// Log.d(TAG, "setListeners");
-		// Set up click listeners for all the buttons
-
-		// connect button
-		this.connect_btn = findViewById(R.id.connect_btn);
-		connect_btn.setOnClickListener(this);
-
-		// disconnect button
-		this.disconnect_btn = findViewById(R.id.disconnect_btn);
-		disconnect_btn.setOnClickListener(this);
-
-		// mute button
-		this.mute_btn = findViewById(R.id.mute_btn);
-		mute_btn.setOnClickListener(this);
-
-		// unmute button
-		this.unmute_btn = findViewById(R.id.unmute_btn);
-		unmute_btn.setOnClickListener(this);
-
-		// increase button
-		this.increase_btn = findViewById(R.id.increase_btn);
-		increase_btn.setOnClickListener(this);
-
-		// decrease button
-		this.decrease_btn = findViewById(R.id.decrease_btn);
-		decrease_btn.setOnClickListener(this);
+		Log.d(TAG, "setListeners()");
+		this.connect_btn.setOnClickListener(this);
+		this.disconnect_btn.setOnClickListener(this);
+		this.mute_btn.setOnClickListener(this);
+		this.unmute_btn.setOnClickListener(this);
+		this.increase_btn.setOnClickListener(this);
+		this.decrease_btn.setOnClickListener(this);
 	}
 
 	/**
 	 * Connect to a host via SSH
-	 * 
-	 * @param host_txt
-	 * @param user_txt
 	 */
-	private void startSSH(String host_txt, String user_txt, int port) {
-		// Log.d(TAG, "startSSH()");
+	private void connect(RemoteComputerData rcd) {
+		Log.d(TAG, "startSSH()");
 
-		try {
-			this.session = jsch.getSession(user_txt, host_txt, port);
-			this.session.setConfig(STFU.config);
+		if (rcd != null) {
+			String username = rcd.Username;
+			String hostname = rcd.Hostname;
+			int port = rcd.Port;
+			int sink = rcd.SinkDevice;
 
-			// Log.d(TAG, "start connect()");
-			this.session.connect();
-			// Log.d(TAG, "connect()  done");
+			this.mute_cmd = "pactl set-sink-mute " + sink + " 1";
+			this.unmute_cmd = "pactl set-sink-mute " + sink + " 0";
+			this.increase_cmd = "pactl set-sink-volume " + sink + " +5%";
+			this.decrease_cmd = "pactl -- set-sink-volume " + sink + " -5%";
 
-		} catch (Exception e) {
-			this.error_tv.setText("Error:\n" + e.getMessage());
-			this.error_tv.setVisibility(View.VISIBLE);
-			// Log.e(TAG, "Exception", e);
-			return;
+			boolean auth_success = false;
+			try {
+				this.session = jsch.getSession(username, hostname, port);
+				this.session.setConfig(STFU.config);
+				this.session.connect();
+				auth_success = true;
+			} catch (Exception e) {
+				if (e.getMessage().startsWith("Auth fail")) {
+					// TODO use strings.xml
+					String msg = "Auth failed";
+					this.show_dialog(msg);
+				}
+				Log.e(TAG, e.getMessage());
+			}
+
+			if (auth_success) {
+				this.hide_connect_btn();
+				this.show_sound_btns();
+			}
 		}
-
-		showCmdButtons();
-		return;
 	}
 
 	/**
@@ -230,9 +186,9 @@ public class STFU extends Activity implements Runnable, OnClickListener {
 	 * 
 	 * @param cmd
 	 */
-	private void sendCmd(String cmd) {
+	private void send_cmd(String cmd) {
+		Log.d(TAG, "send_cmd( " + cmd + " )");
 
-		// Log.d(TAG, "SendCmd( " + cmd + " )");
 		try {
 			this.channel = this.session.openChannel("exec");
 			((ChannelExec) this.channel).setCommand(cmd);
@@ -248,171 +204,120 @@ public class STFU extends Activity implements Runnable, OnClickListener {
 					if (i < 0) {
 						break;
 					}
-					// // Log.d(TAG, "foo: "+this.sink_device);
+					// Log.d(TAG, "foo: "+this.sink_device);
 				}
 				if (this.channel.isClosed()) {
-					// // Log.d(TAG, "exit-status: " + this.channel.getExitStatus());
+					// Log.d(TAG, "exit-status: " +
+					// this.channel.getExitStatus());
 					break;
 				}
 			}
 		} catch (Exception e) {
-			// Log.e(TAG, "Exception", e);
-			this.error_tv.setText("Error:\n" + e.getMessage());
+			Log.e(TAG, e.getMessage());
 		}
 	}
 
 	/**
 	 * Disconnect the SSH-Session
 	 */
-	private void stopSSH() {
-		// Log.d(TAG, "Stopping SSH....");
+	private void disconnect() {
+		Log.d(TAG, "stop_ssh()");
 
-		if (this.session.isConnected()) {
-			try {
-				InputStream in = this.channel.getInputStream();
-				byte[] tmp = new byte[1024];
-				while (true) {
-					while (in.available() > 0) {
-						int i = in.read(tmp, 0, 1024);
-						if (i < 0)
-							break;
-						// // Log.d(TAG, new String(tmp, 0, i));
-					}
-					if (this.channel.isClosed()) {
-						// // Log.d(TAG, "exit-status: " + this.channel.getExitStatus());
-						break;
-					}
-					try {
-						/**
-						 * @TODO wtf?
-						 */
-						Thread.sleep(1000);
-					} catch (Exception ee) {
-					}
-				}
-				this.channel.disconnect();
-				this.session.disconnect();
-			} catch (Exception e) {
-				// Log.e(TAG, "Exception", e);
-				this.error_tv.setText("Error:\n" + e.getMessage());
-			}
+		try {
+			this.channel.disconnect();
+			this.session.disconnect();
+		} catch (Exception e) {
+			Log.e(TAG, "" + e.getMessage());
 		}
-		// Log.d(TAG, "SSH connection closed");
-		hideCmdButtons();
+
+		this.show_connect_btn();
+		this.hide_sound_btns();
+		Log.d(TAG, "" + this.increase_btn.getVisibility());
 	}
 
 	/**
-	 * Show the Control buttons
+	 * display the context menu
 	 */
-	private void showCmdButtons() {
-		this.mute_btn.setVisibility(View.VISIBLE);
-		this.unmute_btn.setVisibility(View.VISIBLE);
-		this.increase_btn.setVisibility(View.VISIBLE);
-		this.decrease_btn.setVisibility(View.VISIBLE);
-	}
-
-	/**
-	 * hide the Control buttons
-	 */
-	private void hideCmdButtons() {
-		this.mute_btn.setVisibility(View.INVISIBLE);
-		this.unmute_btn.setVisibility(View.INVISIBLE);
-		this.increase_btn.setVisibility(View.INVISIBLE);
-		this.decrease_btn.setVisibility(View.INVISIBLE);
-	}
-
-	/**
-	 * initialize the ProgressDialog
-	 */
-	private void initProgressDialog() {
-		this.pd = new ProgressDialog(this);
-		this.pd.setCancelable(true);
-		this.pd.setMessage("Loading Keys - One Moment Please");
-		this.pd.setIndeterminate(true);
-		this.pd.show();
-	}
-
-	// display the context menu
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
+		Log.d(TAG, "onCreateOptionsMenu()");
 		super.onCreateOptionsMenu(menu);
-		// Log.d(TAG, "onCreateOptionsMenu()");
 		MenuInflater inflater = getMenuInflater();
 		inflater.inflate(R.menu.menu, menu);
 		return true;
 	}
 
-	// selected a menu item from the contect menu
+	/**
+	 * selected a menu item from the contect menu
+	 */
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
-		// Log.d(TAG, "onOptionsItemSelected()");
+		Log.d(TAG, "onOptionsItemSelected()");
+		Log.d(TAG, "" + item.getItemId());
+
 		switch (item.getItemId()) {
-		// by clicking on the settings item
 		case R.id.menu_settings:
-			// Log.d(TAG, "Starting Prefs");
 			try {
-				startActivity(new Intent(this, Prefs.class));
+				startActivity(new Intent(this, EditPreferences.class));
+				// Intent pref_intent = new Intent(this, EditPreferences.class);
+				// startActivityForResult(pref_intent, STFU.PREFS_UPDATED);
 			} catch (Exception e) {
-				// Log.e(TAG, "Exception", e);
+				Log.e(TAG, e.getMessage());
 			}
 			return true;
 		}
 		return false;
 	}
 
-	// handles the buttons clicked
+	/**
+	 * handle clicks
+	 */
 	@Override
 	public void onClick(View v) {
-		// Log.d(TAG, "onClick");
+		Log.d(TAG, "onClick()");
+
 		switch (v.getId()) {
 		case R.id.connect_btn: {
 			// start the ssh connection
-			// Log.d(TAG, "Connection to: " + this.host);
-			if (this.host.equals("")) {
-				this.host = this.host_txt.getText().toString();
-			}
-			if (this.user.equals("")) {
-				this.user = this.user_txt.getText().toString();
-			}
-
-			try {
-				startSSH(this.host, this.user, Integer.parseInt(this.port));
-			}
-			catch (Exception e) {
-				this.error_tv.setText("Error:\n" + e.getMessage());
-			}
+			Log.d(TAG, "connect_btn");
+			Log.d(TAG, this.remote_computer_spinner.getSelectedItem()
+					.toString());
+			RemoteComputerData rcd = (RemoteComputerData) this.remote_computer_spinner
+					.getSelectedItem();
+			this.connect(rcd);
 			break;
 		}
 
 		case R.id.disconnect_btn: {
 			// stop the ssh connection
-			stopSSH();
+			this.disconnect();
 			break;
 		}
 
 		case R.id.increase_btn: {
 			// increase the volume
-			sendCmd(this.increase_cmd);
+			this.send_cmd(this.increase_cmd);
 			break;
 		}
-
+		case R.id.decrease_btn: {
+			// decrease the volume
+			send_cmd(this.decrease_cmd);
+			break;
+		}
 		case R.id.mute_btn: {
 			// mute the volume
-			sendCmd(this.mute_cmd);
+			this.toggle_mute_btn();
+			this.send_cmd(this.mute_cmd);
 			break;
 		}
 
 		case R.id.unmute_btn: {
 			// increase the volume
-			sendCmd(this.unmute_cmd);
+			this.toggle_mute_btn();
+			this.send_cmd(this.unmute_cmd);
 			break;
 		}
 
-		case R.id.decrease_btn: {
-			// decrease the volume
-			sendCmd(this.decrease_cmd);
-			break;
-		}
 		}
 	}
 
@@ -438,28 +343,145 @@ public class STFU extends Activity implements Runnable, OnClickListener {
 	@Override
 	public void onConfigurationChanged(Configuration newConfig) {
 		super.onConfigurationChanged(newConfig);
+		Log.d(TAG, "onConfigurationChanged()");
 	}
 
-	@Override
-	public void run() {
-		// load Keys for Pub Auth
+	/**
+	 * load the ssh keys
+	 */
+	public void load_ssh_key() {
+		Log.d(TAG, "load_ssh_key()");
+
 		try {
-			// Log.d(TAG, "trying addIdentity()");
-			this.jsch.addIdentity("/sdcard/STFU/id_rsa");
+			Log.d(TAG, "trying addIdentity()");
+			this.jsch.addIdentity(Environment.getExternalStorageDirectory()
+					.getPath() + "/STFU/id_rsa");
+			this.keys_found = true;
 		} catch (Exception e) {
-
-			this.error_tv.setText(R.string.could_not_find_id_rsa);
-			this.error_tv.setVisibility(View.VISIBLE);
-			// Log.e(TAG, "Exception", e);
+			String e_msg = e.getMessage();
+			Log.e(TAG, e_msg);
+			if (e_msg.startsWith("java.io.FileNotFoundException")) {
+				Log.d(TAG, "Display 'File Not Found'");
+				// TODO use strings.xml for this
+				String msg = "SSH-Keys not found! Copy them to "
+						+ Environment.getExternalStorageDirectory().getPath()
+						+ "/STFU/id_rsa to get this app working";
+				msg += "\n\nFor help check http://hihn.org/stfu/";
+				this.show_dialog(msg);
+			}
 		}
-		handler.sendEmptyMessage(0);
 	}
 
-	private Handler handler = new Handler() {
-		@Override
-		public void handleMessage(Message msg) {
-			// Log.d(TAG, "dismiss the progress dialog");
-			pd.dismiss();
+	/**
+	 * show a dialog box
+	 * 
+	 * @param msg
+	 */
+	private void show_dialog(String msg) {
+		AlertDialog.Builder builder = new AlertDialog.Builder(this);
+		builder.setMessage(msg).setCancelable(false)
+				.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+					public void onClick(DialogInterface dialog, int id) {
+						// do things
+					}
+				});
+		AlertDialog alert = builder.create();
+		alert.show();
+	}
+
+	/**
+	 * hide all the sound-control-buttons (after disconnecting)
+	 */
+	private void hide_sound_btns() {
+		Log.d(TAG, "hide_sound_btns()");
+		this.mute_btn.setVisibility(View.GONE);
+		this.unmute_btn.setVisibility(View.GONE);
+		this.increase_btn.setVisibility(View.GONE);
+		this.decrease_btn.setVisibility(View.GONE);
+	}
+
+	/**
+	 * show all the sound-contorl-buttons (after connecting)
+	 */
+	private void show_sound_btns() {
+		Log.d(TAG, "show_sound_btns()");
+		this.mute_btn.setVisibility(View.VISIBLE);
+		this.increase_btn.setVisibility(View.VISIBLE);
+		this.decrease_btn.setVisibility(View.VISIBLE);
+	}
+
+	/**
+	 * show the connect button (after disconnecting) hide the disconnect button
+	 */
+	private void show_connect_btn() {
+		Log.d(TAG, "show_connect_btn()");
+		this.connect_btn.setVisibility(View.VISIBLE);
+		this.disconnect_btn.setVisibility(View.GONE);
+	}
+
+	/**
+	 * hide the connect button (after connecting) show the disconnect button
+	 */
+	private void hide_connect_btn() {
+		Log.d(TAG, "hide_connect_btn()");
+		this.connect_btn.setVisibility(View.GONE);
+		this.disconnect_btn.setVisibility(View.VISIBLE);
+	}
+
+	/**
+	 * toggle the mute / unmute button
+	 */
+	private void toggle_mute_btn() {
+		Log.d(TAG, "toggle_mute_btn()");
+		Log.d(TAG, "mute_status:" + this.mute_status);
+		if (this.mute_status) {
+			this.mute_status = false;
+			this.mute_btn.setVisibility(View.VISIBLE);
+			this.unmute_btn.setVisibility(View.GONE);
+		} else {
+			this.mute_status = true;
+			this.mute_btn.setVisibility(View.GONE);
+			this.unmute_btn.setVisibility(View.VISIBLE);
 		}
-	};
+	}
+
+	/**
+	 * load saved Remote Computer from the xml file
+	 */
+	private void load_saved_remote_computer() {
+		// Display the saved Remote Computer
+
+		List<RemoteComputerData> spinner_items = new ArrayList<RemoteComputerData>();
+		ProfileXMLHandler profile_xml_handler = new ProfileXMLHandler(
+				getApplicationContext());
+		ArrayList<RemoteComputerData> remote_computer_data_list = profile_xml_handler
+				.read_xml();
+
+		this.remote_computer_spinner = (Spinner) findViewById(R.id.remote_computer_spinner);
+		if (remote_computer_data_list.size() > 0) {
+			Iterator<RemoteComputerData> it = remote_computer_data_list
+					.iterator();
+			while (it.hasNext()) {
+				RemoteComputerData rcd = it.next();
+				spinner_items.add(rcd);
+			}
+
+			ArrayAdapter<RemoteComputerData> remote_computer_adapter = new ArrayAdapter<RemoteComputerData>(
+					this, android.R.layout.simple_spinner_item, spinner_items);
+			// ArrayAdapter<String> ___remote_computer_adapter = new
+			// ArrayAdapter<String>(this, android.R.layout.simple_spinner_item,
+			// spinner_items);
+			remote_computer_adapter
+					.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+
+			remote_computer_spinner.setAdapter(remote_computer_adapter);
+
+			this.show_connect_btn();
+		} else {
+			TextView error_tv = (TextView) findViewById(R.id.no_saved_remote_computer_tv);
+			error_tv.setVisibility(View.VISIBLE);
+			remote_computer_spinner.setVisibility(View.GONE);
+		}
+	}
+
 }

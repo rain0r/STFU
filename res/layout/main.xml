@@ -1,104 +1,77 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/btn_layout"
     android:layout_width="fill_parent"
     android:layout_height="fill_parent"
+    android:layout_below="@id/host_txt"
     android:orientation="vertical" >
 
     <TextView
-        android:id="@+id/about_content"
+        android:id="@+id/no_saved_remote_computer_tv"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
-        android:text="@string/computer_address"
-        android:textSize="18dp" />
+        android:padding="5dip"
+        android:text="No saved Remote Computer. Please add one in the Settings."
+        android:visibility="gone" />
 
-    <TextView
-        android:id="@+id/error_tv"
+    <Spinner
+        android:id="@+id/remote_computer_spinner"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content" />
+
+    <Button
+        android:id="@+id/connect_btn"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="5dp"
-        android:layout_marginTop="5dp"
-        android:textColor="#FF0000"
-        android:textSize="18dp"
-        android:textStyle="bold"
-        android:visibility="invisible" />
+        android:layout_marginBottom="10dip"
+        android:layout_marginTop="25dip"
+        android:contentDescription="connect"
+        android:text="⇅     connect"
+        android:visibility="gone" />
 
-    <EditText
-        android:id="@+id/user_txt"
+    <Button
+        android:id="@+id/disconnect_btn"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
-        android:lines="1" />
+        android:layout_marginBottom="25dip"
+        android:layout_marginTop="25dip"
+        android:contentDescription="disconnect"
+        android:src="@drawable/content_import_export"
+        android:text="⇅     disconnect"
+        android:visibility="gone" />
 
-    <TableLayout
-        xmlns:android="http://schemas.android.com/apk/res/android"
+    <Button
+        android:id="@+id/increase_btn"
         android:layout_width="fill_parent"
-        android:layout_height="fill_parent"
-        android:shrinkColumns="1" >
+        android:layout_height="wrap_content"
+        android:contentDescription="increase sound"
+        android:text="+     increase"
+        android:visibility="gone" />
 
-        <TableRow>
+    <Button
+        android:id="@+id/decrease_btn"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="10dip"
+        android:contentDescription="decrease sound"
+        android:text="-     decrease"
+        android:visibility="gone" />
 
-            <EditText
-                android:id="@+id/host_txt"
-                android:layout_width="0dip"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:lines="1" />
+    <Button
+        android:id="@+id/mute_btn"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="25dip"
+        android:contentDescription="mute"
+        android:text="X     mute"
+        android:visibility="gone" />
 
-            <EditText
-                android:id="@+id/port_txt"
-                android:layout_width="fill_parent"
-                android:layout_height="wrap_content"
-                android:numeric="integer"
-                android:lines="1" />
-        </TableRow>
-
-        <TableRow>
-
-            <ImageButton
-                android:id="@+id/connect_btn"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:src="@drawable/connect_established" />
-
-            <ImageButton
-                android:id="@+id/disconnect_btn"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:src="@drawable/connect_no" />
-        </TableRow>
-
-        <TableRow>
-
-            <ImageButton
-                android:id="@+id/decrease_btn"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:src="@drawable/audio_volume_low"
-                android:visibility="invisible" />
-
-            <ImageButton
-                android:id="@+id/increase_btn"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:src="@drawable/audio_volume_medium"
-                android:visibility="invisible" />
-        </TableRow>
-
-        <TableRow>
-
-            <ImageButton
-                android:id="@+id/mute_btn"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:src="@drawable/audio_volume_off"
-                android:visibility="invisible" />
-
-            <ImageButton
-                android:id="@+id/unmute_btn"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:src="@drawable/audio_volume_high"
-                android:visibility="invisible" />
-        </TableRow>
-    </TableLayout>
+    <Button
+        android:id="@+id/unmute_btn"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:contentDescription="unmute"
+        android:text="♬     unmute"
+        android:visibility="gone" />
 
 </LinearLayout>
