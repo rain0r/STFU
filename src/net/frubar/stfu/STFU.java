@@ -18,6 +18,7 @@ package net.frubar.stfu;
  * 
  */
 
+import java.io.File;
 import java.io.InputStream;
 import java.security.Security;
 import java.util.ArrayList;
@@ -98,6 +99,7 @@ public class STFU extends Activity implements OnClickListener {
 		this.requestWindowFeature(Window.FEATURE_NO_TITLE);
 		setContentView(R.layout.main);
 
+		this.create_stfu_folder();
 		this.jsch = new JSch();
 		this.find_views();
 		this.setListeners();
@@ -481,6 +483,22 @@ public class STFU extends Activity implements OnClickListener {
 			TextView error_tv = (TextView) findViewById(R.id.no_saved_remote_computer_tv);
 			error_tv.setVisibility(View.VISIBLE);
 			remote_computer_spinner.setVisibility(View.GONE);
+		}
+	}
+	
+	/**
+	 * checks if the STFU Folder exists
+	 * creates it, if not
+	 */
+	private void create_stfu_folder() {
+		File f = new File(Environment.getExternalStorageDirectory() + "/STFU");
+		if(!f.isDirectory()) {
+			try {
+				f.mkdir();
+			}
+			catch (Exception e) {
+				Log.e(TAG, e.getMessage());
+			}
 		}
 	}
 
