@@ -25,7 +25,6 @@ public class RemoteComputer extends RelativeLayout implements OnClickListener {
 	private EditText sink_device = null;
 	private Button delete_remote_computer_btn = null;
 	private RemoteComputerData rcd = null;
-	private int id;
 	private Context c = null;
 
 	/**
