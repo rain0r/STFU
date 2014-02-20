@@ -36,18 +36,18 @@ public class EditPreferences extends PreferenceActivity {
 		PreferenceScreen root = getPreferenceManager().createPreferenceScreen(
 				this);
 
-		PreferenceCategory preference_category = new PreferenceCategory(this);
+		PreferenceCategory saved_remote_computer_category = new PreferenceCategory(this);
 		PreferenceCategory add_remote_category = new PreferenceCategory(this);
 		root.addPreference(add_remote_category);
-		root.addPreference(preference_category);
+		root.addPreference(saved_remote_computer_category);
 
 		// Pops up the form to add a new Remote Computer
 		RemoteComputerPreference remote_computer_preference = new RemoteComputerPreference(
-				this, null);
+				this, null, null);
 		add_remote_category.addPreference(remote_computer_preference);
 
 		// Start of the List of saved Remote Computer
-		preference_category.setTitle("Saved Remote Computer");
+		saved_remote_computer_category.setTitle("Saved Remote Computer");
 		add_remote_category.setTitle("Add Remote Computer");
 
 		// Read the XML File for the saved Remote Computer
@@ -58,21 +58,10 @@ public class EditPreferences extends PreferenceActivity {
 		Iterator<RemoteComputerData> it = remote_computer_data_list.iterator();
 		while (it.hasNext()) {
 			RemoteComputerData rcd = it.next();
-
-			CharSequence[] entries = new CharSequence[] { "Delete RemoteComputer" };
-			CharSequence[] entryValues = new CharSequence[] { "" + rcd.id };
-
-			RemoteComputerListPreference item = new RemoteComputerListPreference(
-					this);
-			item.setEntries(entries);
-			item.setEntryValues(entryValues);
-			// targets.setDefaultValue("5");
-			// item.setDialogTitle("TITLE");
-			item.setKey("SelectedTargetKey");
+			RemoteComputerPreference item = new RemoteComputerPreference(this, null, rcd);		
 			item.setTitle(rcd.toString());
-			// targets.setSummary("TITLE");
-
-			preference_category.addPreference(item);
+			
+			saved_remote_computer_category.addPreference(item);
 		}
 
 		return root;

@@ -29,6 +29,7 @@
         android:layout_below="@id/user_txt"
         android:hint="Port"
         android:inputType="numberSigned"
+        android:text="22"
         android:lines="1" />
 
     <TextView
@@ -57,5 +58,17 @@
         android:lines="1"
         android:numeric="integer"
         android:text="0" />
+    
+    <Button 
+        android:id="@+id/delete_remote_computer_btn"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:text="Delete Remote Computer"   
+        android:visibility="gone"
+        android:layout_below="@id/sink_device_txt"
+        android:paddingTop="20dip"
+        android:paddingBottom="20dip"
+        android:padding="5dip"
+        />
 
 </RelativeLayout>

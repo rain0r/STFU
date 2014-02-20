@@ -11,8 +11,17 @@
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
         android:padding="5dip"
-        android:text="No saved Remote Computer. Please add one in the Settings."
+        android:textSize="32sp"
+        android:text="No saved Remote Computer. Please add one."
         android:visibility="gone" />
+    
+    <Button 
+        android:id="@+id/no_saved_remote_computer_btn"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:text="Add Remote Computer"
+        android:visibility="gone"
+        />
 
     <Spinner
         android:id="@+id/remote_computer_spinner"

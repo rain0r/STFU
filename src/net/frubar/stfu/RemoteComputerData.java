@@ -17,4 +17,16 @@ public class RemoteComputerData {
 	public String toString() {
 		return this.Username + "@" + this.Hostname + ":" + this.Port;
 	}
+	
+	public String get_port() {
+		return String.valueOf(this.Port);
+	}
+	
+	public String get_sink_device() {
+		return String.valueOf(this.SinkDevice);
+	}
+	
+	public String get_id() {
+		return String.valueOf(this.id);
+	}
 }

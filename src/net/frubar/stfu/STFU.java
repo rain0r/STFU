@@ -75,6 +75,7 @@ public class STFU extends Activity implements OnClickListener {
 	private View unmute_btn = null;
 	private View increase_btn = null;
 	private View decrease_btn = null;
+	private View no_saved_remote_computer_btn = null;
 
 	public static RemoteComputerData connect_remote_computer_data = null;
 	// private SpinnerActivity spinner_activity = null;
@@ -129,6 +130,7 @@ public class STFU extends Activity implements OnClickListener {
 		this.unmute_btn = (Button) findViewById(R.id.unmute_btn);
 		this.increase_btn = (Button) findViewById(R.id.increase_btn);
 		this.decrease_btn = (Button) findViewById(R.id.decrease_btn);
+		this.no_saved_remote_computer_btn = (Button) findViewById(R.id.no_saved_remote_computer_btn);
 	}
 
 	/**
@@ -142,6 +144,7 @@ public class STFU extends Activity implements OnClickListener {
 		this.unmute_btn.setOnClickListener(this);
 		this.increase_btn.setOnClickListener(this);
 		this.decrease_btn.setOnClickListener(this);
+		this.no_saved_remote_computer_btn.setOnClickListener(this);
 	}
 
 	/**
@@ -319,6 +322,16 @@ public class STFU extends Activity implements OnClickListener {
 			this.send_cmd(this.unmute_cmd);
 			break;
 		}
+		
+		case R.id.no_saved_remote_computer_btn: {
+			// start the 'Add RemoteComputer' formular
+			Log.d(TAG, "clicked on 'Add RemoteComputer' via main.xml");
+			try {
+				startActivity(new Intent(this, EditPreferences.class));
+			} catch (Exception e) {
+				Log.e(TAG, e.getMessage());
+			}
+		}
 
 		}
 	}
@@ -480,8 +493,16 @@ public class STFU extends Activity implements OnClickListener {
 
 			this.show_connect_btn();
 		} else {
+			// Show the User that he hasnt added any RemoteComputer yet
+			
+			// The Text Message
 			TextView error_tv = (TextView) findViewById(R.id.no_saved_remote_computer_tv);
 			error_tv.setVisibility(View.VISIBLE);
+			
+			// The 'Add RemoteComputer' Button
+			Button error_btn = (Button) findViewById(R.id.no_saved_remote_computer_btn);
+			error_btn.setVisibility(View.VISIBLE);
+			
 			remote_computer_spinner.setVisibility(View.GONE);
 		}
 	}

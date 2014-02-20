@@ -19,20 +19,22 @@ public class RemoteComputerPreference extends DialogPreference {
 	private static final String TAG = "RemoteComputerPreference";
 	private RemoteComputer remote_computer = null;
 	private Context c = null;
+	private RemoteComputerData rcp = null;
 
 	/**
 	 * @param context
 	 * @param attrs
 	 */
-	public RemoteComputerPreference(Context context, AttributeSet attrs) {
+	public RemoteComputerPreference(Context context, AttributeSet attrs, RemoteComputerData rcp) {
 		super(context, attrs);
 		Log.d(TAG, "RemoteComputerPreference()");
 		this.c = context;
+		this.rcp = rcp;
 		this.setTitle("New Remote Computer");
 	}
 
 	protected View onCreateDialogView() {
-		this.remote_computer = new RemoteComputer(getContext());
+		this.remote_computer = new RemoteComputer(getContext(), this.rcp);
 
 		return (this.remote_computer);
 	}
@@ -52,6 +54,16 @@ public class RemoteComputerPreference extends DialogPreference {
 
 			ProfileXMLHandler profile_editor = new ProfileXMLHandler(this.c);
 			profile_editor.add_profile(username, hostname, port, sink_device);
+			
+			if (this.rcp != null) {
+				// delete the old profile
+				try {
+					profile_editor.delete_profile(String.valueOf(this.rcp.id));
+				} catch (Exception e) {
+					Log.e(TAG, e.getMessage());
+				}
+				
+			}
 
 			// Restart the Settings
 			Context c_ = this.c;
