@@ -22,5 +22,6 @@
     <string name="port">Port</string>
     <string name="port_summary">Enter the Port of the SSH-Server (default 22)</string>
     <string name="sink_device">Sink Device</string>
-    <string name="sink_device_summary">The Number of the Sink Device (default 0)</string>    
+    <string name="sink_device_summary">The Number of the Sink Device (default 0)</string>
+    <string name="settings_export_pub_key">Export Public Key</string>    
 </resources>

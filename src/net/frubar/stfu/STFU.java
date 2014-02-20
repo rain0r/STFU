@@ -19,6 +19,8 @@ package net.frubar.stfu;
  */
 
 import java.io.File;
+import java.io.FileReader;
+import java.io.IOException;
 import java.io.InputStream;
 import java.security.Security;
 import java.util.ArrayList;
@@ -96,7 +98,7 @@ public class STFU extends Activity implements OnClickListener {
 	public void onCreate(Bundle savedInstanceState) {
 		Log.d(TAG, "onCreate()");
 		super.onCreate(savedInstanceState);
-		
+
 		this.requestWindowFeature(Window.FEATURE_NO_TITLE);
 		setContentView(R.layout.main);
 
@@ -110,14 +112,13 @@ public class STFU extends Activity implements OnClickListener {
 			this.load_saved_remote_computer();
 		}
 	}
-	
+
 	@Override
 	protected void onResume() {
 		super.onResume();
 		Log.d(TAG, "onResume()");
 		this.load_saved_remote_computer();
 	}
-
 
 	/**
 	 * find Views and Edits
@@ -270,6 +271,21 @@ public class STFU extends Activity implements OnClickListener {
 				Log.e(TAG, e.getMessage());
 			}
 			return true;
+		case R.id.menu_export_pub_key:
+			try {
+				// read the pubkey in a string
+				String pub_key = this.read_file(Environment
+						.getExternalStorageDirectory().getPath()
+						+ "/STFU/id_rsa.pub");
+
+				Intent sendIntent = new Intent();
+				sendIntent.setAction(Intent.ACTION_SEND);
+				sendIntent.putExtra(Intent.EXTRA_TEXT, pub_key);
+				sendIntent.setType("text/plain");
+				startActivity(sendIntent);
+			} catch (Exception e) {
+				Log.e(TAG, e.getMessage());
+			}
 		}
 		return false;
 	}
@@ -322,7 +338,7 @@ public class STFU extends Activity implements OnClickListener {
 			this.send_cmd(this.unmute_cmd);
 			break;
 		}
-		
+
 		case R.id.no_saved_remote_computer_btn: {
 			// start the 'Add RemoteComputer' formular
 			Log.d(TAG, "clicked on 'Add RemoteComputer' via main.xml");
@@ -494,33 +510,46 @@ public class STFU extends Activity implements OnClickListener {
 			this.show_connect_btn();
 		} else {
 			// Show the User that he hasnt added any RemoteComputer yet
-			
+
 			// The Text Message
 			TextView error_tv = (TextView) findViewById(R.id.no_saved_remote_computer_tv);
 			error_tv.setVisibility(View.VISIBLE);
-			
+
 			// The 'Add RemoteComputer' Button
 			Button error_btn = (Button) findViewById(R.id.no_saved_remote_computer_btn);
 			error_btn.setVisibility(View.VISIBLE);
-			
+
 			remote_computer_spinner.setVisibility(View.GONE);
 		}
 	}
-	
+
 	/**
-	 * checks if the STFU Folder exists
-	 * creates it, if not
+	 * checks if the STFU Folder exists creates it, if not
 	 */
 	private void create_stfu_folder() {
 		File f = new File(Environment.getExternalStorageDirectory() + "/STFU");
-		if(!f.isDirectory()) {
+		if (!f.isDirectory()) {
 			try {
 				f.mkdir();
-			}
-			catch (Exception e) {
+			} catch (Exception e) {
 				Log.e(TAG, e.getMessage());
 			}
 		}
+	}
+
+	public String read_file(String filename) {
+		String content = null;
+		File file = new File(filename);
+		try {
+			FileReader reader = new FileReader(file);
+			char[] chars = new char[(int) file.length()];
+			reader.read(chars);
+			content = new String(chars);
+			reader.close();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		return content;
 	}
 
 }
