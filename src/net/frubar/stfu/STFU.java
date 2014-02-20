@@ -68,7 +68,6 @@ public class STFU extends Activity implements OnClickListener {
 	private String unmute_cmd = null;
 	private String increase_cmd = null;
 	private String decrease_cmd = null;
-	// private String get_sink_cmd = "pacmd list-sinks | grep '* index'";
 
 	// buttons
 	private View connect_btn = null;
@@ -80,7 +79,6 @@ public class STFU extends Activity implements OnClickListener {
 	private View no_saved_remote_computer_btn = null;
 
 	public static RemoteComputerData connect_remote_computer_data = null;
-	// private SpinnerActivity spinner_activity = null;
 	private Spinner remote_computer_spinner = null;
 	private boolean mute_status = false;
 
@@ -210,11 +208,8 @@ public class STFU extends Activity implements OnClickListener {
 					if (i < 0) {
 						break;
 					}
-					// Log.d(TAG, "foo: "+this.sink_device);
 				}
 				if (this.channel.isClosed()) {
-					// Log.d(TAG, "exit-status: " +
-					// this.channel.getExitStatus());
 					break;
 				}
 			}
@@ -265,8 +260,6 @@ public class STFU extends Activity implements OnClickListener {
 		case R.id.menu_settings:
 			try {
 				startActivity(new Intent(this, EditPreferences.class));
-				// Intent pref_intent = new Intent(this, EditPreferences.class);
-				// startActivityForResult(pref_intent, STFU.PREFS_UPDATED);
 			} catch (Exception e) {
 				Log.e(TAG, e.getMessage());
 			}
@@ -499,9 +492,6 @@ public class STFU extends Activity implements OnClickListener {
 
 			ArrayAdapter<RemoteComputerData> remote_computer_adapter = new ArrayAdapter<RemoteComputerData>(
 					this, android.R.layout.simple_spinner_item, spinner_items);
-			// ArrayAdapter<String> ___remote_computer_adapter = new
-			// ArrayAdapter<String>(this, android.R.layout.simple_spinner_item,
-			// spinner_items);
 			remote_computer_adapter
 					.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
 

@@ -166,8 +166,6 @@ public class ProfileXMLHandler {
 				pullParserFactory = XmlPullParserFactory.newInstance();
 				XmlPullParser parser = pullParserFactory.newPullParser();
 
-				// InputStream in_s =
-				// getApplicationContext().getAssets().open("profiles.xml");
 				InputStream in_s = this.c.getApplicationContext()
 						.openFileInput("profiles.xml");
 
